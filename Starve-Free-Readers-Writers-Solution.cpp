@@ -1,6 +1,37 @@
-semaphore rmutex = 1;  // mutex used for <Entry> and <Exit> section while reading
-semaphore resource = 1; // semaphore used to prevent simultaneous read and write
-semaphore fifoq = 1; // semaphore used design sarve-free readers writers solution by maintaing FIFO signalling of requests
+struct semaphore{  // creating a semaphore
+    int value; // current value of semaphore
+    semaphore(int x){
+        value = x;
+    }
+    queue <Process> q; // queue for Processes, Process is the datatype for process
+};
+
+wait(semaphore s){
+    s.value = s.value - 1; // decrementing the value by 1.
+    if(s.value < 0){
+        s.q.push(p);  // p is the currently running process
+        block(); // block() is a system call to block the current process
+    }
+    else{
+        return;
+    }
+}
+
+signal(semaphore s){
+    s.value = s.value + 1;
+    if(s.value<=0){
+        Process p = s.q.front(); // fifo ordereing and getting first pushed process
+        s.q.pop(); // removing from queue
+        wakeup(p); // resuming blocked Process p; wakeup() is the system call used
+    }
+    else{ // if value becomes 1 then return as semaphore is free
+        return;
+    }
+}
+
+semaphore rmutex (1);  // mutex used for <Entry> and <Exit> section while reading
+semaphore resource (1); // semaphore used to prevent simultaneous read and write
+semaphore fifoq (1); // semaphore used design sarve-free readers writers solution by maintaing FIFO signalling of requests
 int readcount = 0;  //  used to keep track of concurrent read operations
 
 /*
